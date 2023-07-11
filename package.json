@@ -6,6 +6,8 @@
   "version": "10.1.0-pre",
   "repository": "github:grafana/grafana",
   "scripts": {
+    "build:menu": "node ./menu/index.mjs",
+    "build:menu-watch": "cross-env WATCH=1 node ./menu/index.mjs",
     "build": "yarn i18n:compile && NODE_ENV=production webpack --progress --config scripts/webpack/webpack.prod.js",
     "build:nominify": "yarn run build --env noMinify=1",
     "dev": "yarn i18n:compile && NODE_ENV=dev webpack --progress --color --config scripts/webpack/webpack.dev.js",
@@ -176,6 +178,7 @@
     "chance": "^1.0.10",
     "codeowners": "^5.1.1",
     "copy-webpack-plugin": "11.0.0",
+    "cross-env": "^7.0.3",
     "css-loader": "6.8.1",
     "css-minimizer-webpack-plugin": "4.2.2",
     "cypress": "9.5.1",

@@ -194,3 +194,5 @@ deployment_tools_config.json
 
 # Temporary file for backporting PRs
 .pr-body.txt
+
+menu-generator

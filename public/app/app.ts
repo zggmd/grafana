@@ -112,7 +112,7 @@ if (process.env.NODE_ENV === 'development') {
 export class GrafanaApp {
   context!: GrafanaContextType;
 
-  async init() {
+  async init(container = undefined) {
     try {
       // Let iframe container know grafana has started loading
       parent.postMessage('GrafanaAppInit', '*');
@@ -221,7 +221,7 @@ export class GrafanaApp {
         config,
       };
 
-      const root = createRoot(document.getElementById('reactRoot')!);
+      const root = createRoot(container || document.getElementById('reactRoot')!);
       root.render(
         React.createElement(AppWrapper, {
           app: this,
