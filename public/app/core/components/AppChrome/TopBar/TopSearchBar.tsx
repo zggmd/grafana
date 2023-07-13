@@ -9,6 +9,7 @@ import { config } from 'app/core/config';
 import { contextSrv } from 'app/core/core';
 import { useSelector } from 'app/types';
 
+import { IS_QIANKUN } from '../../../../qiankun/constants';
 import { Branding } from '../../Branding/Branding';
 import { enrichHelpItem } from '../MegaMenu/utils';
 import { NewsContainer } from '../News/NewsContainer';
@@ -56,8 +57,8 @@ export const TopSearchBar = React.memo(function TopSearchBar() {
           </Dropdown>
         )}
         <NewsContainer className={styles.newsButton} />
-        {!contextSrv.user.isSignedIn && <SignInLink />}
-        {profileNode && (
+        {!IS_QIANKUN && !contextSrv.user.isSignedIn && <SignInLink />}
+        {!IS_QIANKUN && profileNode && (
           <Dropdown overlay={() => <TopNavBarMenu node={profileNode} />} placement="bottom-end">
             <ToolbarButton
               className={styles.profileButton}
