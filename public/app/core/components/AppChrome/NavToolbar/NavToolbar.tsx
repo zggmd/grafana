@@ -8,12 +8,12 @@ import { t } from 'app/core/internationalization';
 import { HOME_NAV_ID } from 'app/core/reducers/navModel';
 import { useSelector } from 'app/types';
 
+import { IS_QIANKUN } from '../../../../qiankun/constants';
 import { Breadcrumbs } from '../../Breadcrumbs/Breadcrumbs';
 import { buildBreadcrumbs } from '../../Breadcrumbs/utils';
 import { TOP_BAR_LEVEL_HEIGHT } from '../types';
 
 import { NavToolbarSeparator } from './NavToolbarSeparator';
-import {IS_QIANKUN} from "../../../../qiankun/constants";
 
 export interface Props {
   onToggleSearchBar(): void;
@@ -40,8 +40,8 @@ export function NavToolbar({
 
   return (
     <div data-testid={Components.NavToolbar.container} className={styles.pageToolbar}>
-      {
-        !IS_QIANKUN && <div className={styles.menuButton}>
+      {!IS_QIANKUN && (
+        <div className={styles.menuButton}>
           <IconButton
             name="bars"
             tooltip={t('navigation.toolbar.toggle-menu', 'Toggle menu')}
@@ -50,7 +50,7 @@ export function NavToolbar({
             onClick={onToggleMegaMenu}
           />
         </div>
-      }
+      )}
       <Breadcrumbs breadcrumbs={breadcrumbs} className={styles.breadcrumbs} />
       <div className={styles.actions}>
         {actions}
