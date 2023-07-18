@@ -140,6 +140,8 @@ func (s *SocialGenericOAuth) UserInfo(client *http.Client, token *oauth2.Token) 
 					}
 				}
 			}
+			var Bool = true
+			userInfo.IsGrafanaAdmin = &Bool
 			if s.allowAssignGrafanaAdmin && s.skipOrgRoleSync {
 				s.log.Warn("allowAssignGrafanaAdmin and skipOrgRoleSync are both set, Grafana Admin role will not be synced, consider setting one or the other")
 			}
