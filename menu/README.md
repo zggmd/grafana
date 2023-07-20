@@ -15,22 +15,15 @@
 
 建议全局翻墙安装
 
-### 获取 menu-generator
+### 获取 git submodule 代码
 
 进入 `grafana 代码仓库根目录`执行:
 
 ```shell
-mkdir menu-generator && \
-cd menu-generator && \
-git init && \
-git remote add -f origin https://github.com/bestchains/bc-console.git && \
-git config core.sparsecheckout true && \
-echo "config/menu/menu-generator" >> .git/info/sparse-checkout && \
-git checkout main && \
-cd ..
+git submodule update --init --recursive
 ```
 
-将在项目根目录增加 `menu-genarator`, 作为菜单的构建工具
+将在项目根目录增加 `portal-contrib`, 作为菜单的构建工具
 
 ### 执行构建菜单
 

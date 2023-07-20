@@ -1,0 +1,3 @@
+[submodule "portal-contrib"]
+	path = portal-contrib
+	url = https://github.com/kubebb/portal-contrib.git
