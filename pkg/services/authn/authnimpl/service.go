@@ -81,10 +81,6 @@ func ProvideService(
 	s.RegisterClient(clients.ProvideRender(userService, renderService))
 	s.RegisterClient(clients.ProvideAPIKey(apikeyService, userService))
 
-	if cfg.LoginCookieName != "" {
-		s.RegisterClient(clients.ProvideSession(cfg, sessionService, features))
-	}
-
 	if s.cfg.AnonymousEnabled {
 		s.RegisterClient(clients.ProvideAnonymous(cfg, orgService, anonSessionService))
 	}
@@ -128,6 +124,8 @@ func ProvideService(
 		s.RegisterClient(clients.ProvideJWT(jwtService, cfg))
 	}
 
+	var oauthHTTPClient *http.Client
+	var oauthConnector social.SocialConnector
 	for name := range socialService.GetOAuthProviders() {
 		oauthCfg := socialService.GetOAuthInfoProvider(name)
 		if oauthCfg != nil && oauthCfg.Enabled {
@@ -140,8 +138,22 @@ func ProvideService(
 			} else {
 				s.RegisterClient(clients.ProvideOAuth(clientName, cfg, oauthCfg, connector, httpClient))
 			}
+			if name == "generic_oauth" {
+				// enable oauth with another OAuth2 which only helps to authenticate users
+				s.RegisterClient(clients.ProvideOAuth2(clientName, cfg, oauthCfg, connector, httpClient))
+				// set oauthHTTPClient and oauthConnector for later use
+				oauthHTTPClient = httpClient
+				oauthConnector = connector
+			}
+
 		}
 	}
+
+	if cfg.LoginCookieName != "" {
+		s.RegisterClient(clients.ProvideSession(cfg, sessionService, features, oauthConnector, oauthHTTPClient))
+	}
+
+	// DISABLE SYNC SERVER
 
 	// FIXME (jguer): move to User package
 	userSyncService := sync.ProvideUserSync(userService, userProtectionService, authInfoService, quotaService)
@@ -185,6 +197,7 @@ func (s *Service) Authenticate(ctx context.Context, r *authn.Request) (*authn.Id
 
 	var authErr error
 	for _, item := range s.clientQueue.items {
+		// check if client can be used to authenticate this request
 		if item.v.Test(ctx, r) {
 			identity, err := s.authenticate(ctx, item.v, r)
 			if err != nil {
@@ -216,6 +229,7 @@ func (s *Service) Authenticate(ctx context.Context, r *authn.Request) (*authn.Id
 
 func (s *Service) authenticate(ctx context.Context, c authn.Client, r *authn.Request) (*authn.Identity, error) {
 	r.OrgID = orgIDFromRequest(r)
+	// if c is oauth,then use Authenticate2 instead of Authenticate
 	identity, err := c.Authenticate(ctx, r)
 	if err != nil {
 		s.log.FromContext(ctx).Warn("Failed to authenticate request", "client", c.Name(), "error", err)

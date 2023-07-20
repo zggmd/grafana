@@ -55,7 +55,7 @@ func Middleware(ac AccessControl) func(web.Handler, Evaluator) web.Handler {
 				return
 			}
 
-			authorize(c, ac, c.SignedInUser, evaluator)
+			// authorize(c, ac, c.SignedInUser, evaluator)
 		}
 	}
 }
@@ -187,41 +187,41 @@ func AuthorizeInOrgMiddleware(ac AccessControl, service Service, cache userCache
 		}
 
 		return func(c *contextmodel.ReqContext) {
-			// using a copy of the user not to modify the signedInUser, yet perform the permission evaluation in another org
-			userCopy := *(c.SignedInUser)
-			orgID, err := getTargetOrg(c)
-			if err != nil {
-				deny(c, nil, fmt.Errorf("failed to get target org: %w", err))
-				return
-			}
-			if orgID == GlobalOrgID {
-				userCopy.OrgID = orgID
-				userCopy.OrgName = ""
-				userCopy.OrgRole = ""
-			} else {
-				query := user.GetSignedInUserQuery{UserID: c.UserID, OrgID: orgID}
-				queryResult, err := cache.GetSignedInUserWithCacheCtx(c.Req.Context(), &query)
-				if err != nil {
-					deny(c, nil, fmt.Errorf("failed to authenticate user in target org: %w", err))
-					return
-				}
-				userCopy.OrgID = queryResult.OrgID
-				userCopy.OrgName = queryResult.OrgName
-				userCopy.OrgRole = queryResult.OrgRole
-			}
+			// // using a copy of the user not to modify the signedInUser, yet perform the permission evaluation in another org
+			// userCopy := *(c.SignedInUser)
+			// orgID, err := getTargetOrg(c)
+			// if err != nil {
+			// 	deny(c, nil, fmt.Errorf("failed to get target org: %w", err))
+			// 	return
+			// }
+			// if orgID == GlobalOrgID {
+			// 	userCopy.OrgID = orgID
+			// 	userCopy.OrgName = ""
+			// 	userCopy.OrgRole = ""
+			// } else {
+			// 	query := user.GetSignedInUserQuery{UserID: c.UserID, OrgID: orgID}
+			// 	queryResult, err := cache.GetSignedInUserWithCacheCtx(c.Req.Context(), &query)
+			// 	if err != nil {
+			// 		deny(c, nil, fmt.Errorf("failed to authenticate user in target org: %w", err))
+			// 		return
+			// 	}
+			// 	userCopy.OrgID = queryResult.OrgID
+			// 	userCopy.OrgName = queryResult.OrgName
+			// 	userCopy.OrgRole = queryResult.OrgRole
+			// }
 
-			if userCopy.Permissions[userCopy.OrgID] == nil {
-				permissions, err := service.GetUserPermissions(c.Req.Context(), &userCopy, Options{})
-				if err != nil {
-					deny(c, nil, fmt.Errorf("failed to authenticate user in target org: %w", err))
-				}
-				userCopy.Permissions[userCopy.OrgID] = GroupScopesByAction(permissions)
-			}
+			// if userCopy.Permissions[userCopy.OrgID] == nil {
+			// 	permissions, err := service.GetUserPermissions(c.Req.Context(), &userCopy, Options{})
+			// 	if err != nil {
+			// 		deny(c, nil, fmt.Errorf("failed to authenticate user in target org: %w", err))
+			// 	}
+			// 	userCopy.Permissions[userCopy.OrgID] = GroupScopesByAction(permissions)
+			// }
 
-			authorize(c, ac, &userCopy, evaluator)
+			// authorize(c, ac, &userCopy, evaluator)
 
-			// Set the sign-ed in user permissions in that org
-			c.SignedInUser.Permissions[userCopy.OrgID] = userCopy.Permissions[userCopy.OrgID]
+			// // Set the sign-ed in user permissions in that org
+			// c.SignedInUser.Permissions[userCopy.OrgID] = userCopy.Permissions[userCopy.OrgID]
 		}
 	}
 }

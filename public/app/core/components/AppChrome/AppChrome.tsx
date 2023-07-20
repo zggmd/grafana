@@ -8,6 +8,8 @@ import { useGrafana } from 'app/core/context/GrafanaContext';
 import { CommandPalette } from 'app/features/commandPalette/CommandPalette';
 import { KioskMode } from 'app/types';
 
+import { IS_QIANKUN } from '../../../qiankun/constants';
+
 import { MegaMenu } from './MegaMenu/MegaMenu';
 import { NavToolbar } from './NavToolbar/NavToolbar';
 import { SectionNav } from './SectionNav/SectionNav';
@@ -86,8 +88,8 @@ const getStyles = (theme: GrafanaTheme2) => {
     }),
     topNav: css({
       display: 'flex',
-      position: 'fixed',
-      zIndex: theme.zIndex.navbarFixed,
+      position: IS_QIANKUN ? 'absolute' : 'fixed',
+      zIndex: IS_QIANKUN ? 10 : theme.zIndex.navbarFixed,
       left: 0,
       right: 0,
       boxShadow: shadow,
