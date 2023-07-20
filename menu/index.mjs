@@ -1,4 +1,4 @@
-import generateMenuFile from "../menu-generator/config/menu/menu-generator/index.mjs";
+import generateMenuFile from "../portal-contrib/menu-generator/index.mjs";
 
 generateMenuFile({
   basename: '/grafana',
