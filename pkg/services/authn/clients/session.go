@@ -97,11 +97,11 @@ func (s *Session) Authenticate(ctx context.Context, r *authn.Request) (*authn.Id
 			OAuthToken:     token,
 
 			ClientParams: authn.ClientParams{
-				SyncUser:        false,
-				SyncTeams:       false,
-				FetchSyncedUser: false,
-				SyncPermissions: false,
-				AllowSignUp:     false,
+				SyncUser:        true,
+				SyncTeams:       true,
+				FetchSyncedUser: true,
+				SyncPermissions: true,
+				AllowSignUp:     true,
 			},
 		}, nil
 	}
