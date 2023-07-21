@@ -27,6 +27,7 @@ func ProvideSession(cfg *setting.Cfg, sessionService auth.UserTokenService, feat
 		features:       features,
 		sessionService: sessionService,
 		log:            log.New(authn.ClientSession),
+		// Enale OAuth with session 
 		connector:      connector,
 		httpClient:     httpClient,
 	}
@@ -38,6 +39,7 @@ type Session struct {
 	sessionService auth.UserTokenService
 	log            log.Logger
 
+	// Enale OAuth with session 
 	// Copied from OAuth.go
 	connector  social.SocialConnector
 	httpClient *http.Client
@@ -58,6 +60,26 @@ func (s *Session) Authenticate(ctx context.Context, r *authn.Request) (*authn.Id
 		return nil, err
 	}
 
+	token, sessionErr := s.sessionService.LookupToken(ctx, rawSessionToken)
+	// if token found in session service,then use the origin `session` mechanism
+	if sessionErr == nil {
+		if s.features.IsEnabled(featuremgmt.FlagClientTokenRotation) {
+			if token.NeedsRotation(time.Duration(s.cfg.TokenRotationIntervalMinutes) * time.Minute) {
+				return nil, authn.ErrTokenNeedsRotation.Errorf("token needs to be rotated")
+			}
+		}
+	
+		return &authn.Identity{
+			ID:           authn.NamespacedID(authn.NamespaceUser, token.UserId),
+			SessionToken: token,
+			ClientParams: authn.ClientParams{
+				FetchSyncedUser: true,
+				SyncPermissions: true,
+			},
+		}, nil
+	}
+
+	// if oauth is enabled,use OAuth
 	if s.httpClient != nil && s.connector != nil {
 		clientCtx := context.WithValue(ctx, oauth2.HTTPClient, s.httpClient)
 
@@ -106,25 +128,8 @@ func (s *Session) Authenticate(ctx context.Context, r *authn.Request) (*authn.Id
 		}, nil
 	}
 
-	token, err := s.sessionService.LookupToken(ctx, rawSessionToken)
-	if err != nil {
-		return nil, err
-	}
-
-	if s.features.IsEnabled(featuremgmt.FlagClientTokenRotation) {
-		if token.NeedsRotation(time.Duration(s.cfg.TokenRotationIntervalMinutes) * time.Minute) {
-			return nil, authn.ErrTokenNeedsRotation.Errorf("token needs to be rotated")
-		}
-	}
-
-	return &authn.Identity{
-		ID:           authn.NamespacedID(authn.NamespaceUser, token.UserId),
-		SessionToken: token,
-		ClientParams: authn.ClientParams{
-			FetchSyncedUser: true,
-			SyncPermissions: true,
-		},
-	}, nil
+	// return sessionErr if OAuth not enabled in seesion
+	return nil,sessionErr
 }
 
 func (s *Session) Test(ctx context.Context, r *authn.Request) bool {
